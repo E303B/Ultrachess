@@ -48,7 +48,11 @@ def fromFenToTensor(fen:str):
     posshape = (9, 8, 2)
     postensor = torch.zeros(posshape)
     temp_board = chess.Board()
-    temp_board.set_fen(fen)
+    try:
+        temp_board.set_fen(fen)
+    except ValueError:
+        print("Not a FEN")
+        return None
     if temp_board.turn==chess.BLACK:
         temp_board.set_fen(reverseBoard(temp_board.fen()))
     for i in range(8):
