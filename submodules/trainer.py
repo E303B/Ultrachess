@@ -69,7 +69,7 @@ def train_loop(dataloader, model, loss_fn, optimizer, device):
         optimizer.zero_grad()
 
         if batch % 100 == 0:
-            loss, current = loss.item(), batch * batch_size + len(position)
+            loss, current = loss.item(), batch * values.batch_size + len(position)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
             
 def test_loop(dataloader, model, loss_fn, device):
@@ -100,26 +100,21 @@ def test_loop(dataloader, model, loss_fn, device):
     print(f"Test Error: \n Accuracy: {(100*correct):>4f}%, Avg loss: {test_loss:>8f} \n")
     
 if __name__ == '__main__':
-    device = "cpu"
-    learning_rate = 1e-3
-    batch_size = 2048
-    epochs = 100
-    modelname="loji-0.1"
     
     training_data = ChessDataset("data/default.data")
     testing_data = ChessDataset("data/test.data")
-    training_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
-    testing_dataloader = DataLoader(testing_data, batch_size=batch_size, shuffle=True)
+    training_dataloader = DataLoader(training_data, batch_size=values.batch_size, shuffle=True)
+    testing_dataloader = DataLoader(testing_data, batch_size=values.batch_size, shuffle=True)
     model = NeuralNetwork()
-    model.to(device=device)
+    model.to(device=values.device)
      
     
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.SGD(model.parameters(), lr=values.learning_rate)
     
-    for t in range(epochs):
+    for t in range(values.epochs):
         print(f"Epoch: {t+1}")
-        train_loop(training_dataloader, model, loss_fn, optimizer, device)
-        test_loop(testing_dataloader, model, loss_fn, device)
+        train_loop(training_dataloader, model, loss_fn, optimizer, values.device)
+        test_loop(testing_dataloader, model, loss_fn, values.device)
     print("Finished!")
-    torch.save(model, "models/"+modelname+".pth")
+    torch.save(model, "models/"+values.modelname+".pth")

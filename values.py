@@ -1,1 +1,0 @@
-stockfishpath="C:/Coding/Stockfish/stockfish-windows-x86-64-avx2.exe"
