@@ -103,7 +103,7 @@ if __name__ == '__main__':
     device = "cpu"
     learning_rate = 1e-3
     batch_size = 2048
-    epochs = 50
+    epochs = 100
     modelname="loji-0.1"
     
     training_data = ChessDataset("data/default.data")
