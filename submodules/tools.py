@@ -1,7 +1,7 @@
 import chess
 import torch
 
-def reverse_bits(n, num_bits=32):
+def reverseBits(n, num_bits=32):
     """
     Reverses all bits from left to right
     """
@@ -24,7 +24,7 @@ def reverseBoard(fen: str)->str:
     """
     old_board = chess.Board(fen)
     new_board = chess.Board.empty()
-    new_board.castling_rights |= reverse_bits(old_board.castling_rights, 4)
+    new_board.castling_rights |= reverseBits(old_board.castling_rights, 4)
     if old_board.ep_square:
         new_board.ep_square=rs(old_board.ep_square)
     new_board.halfmove_clock=old_board.halfmove_clock
@@ -38,6 +38,10 @@ def reverseBoard(fen: str)->str:
     return new_board.fen()
 
 def reverseMove(move:str)->str:
+    """
+    Reverses move diagonally
+    """
+    
     if len(move)>4:
         result = chess.square_name(rs(chess.parse_square(move[0:2])))+chess.square_name(rs(chess.parse_square(move[2:4])))+move[4]
     else:
@@ -45,6 +49,9 @@ def reverseMove(move:str)->str:
     return result
 
 def fromFenToTensor(fen:str):
+    """
+    Transforms FEN chess positino into a torch.tensor
+    """
     posshape = (9, 8, 2)
     postensor = torch.zeros(posshape)
     temp_board = chess.Board()
@@ -78,6 +85,9 @@ def fromFenToTensor(fen:str):
     return postensor
 
 def fromMoveToTensor(move:str, switch=False):
+    """
+    Transforms UCI chess move into torch.tensor
+    """
     if switch:
         move = reverseMove(move)
     moveshape = (5)
@@ -92,3 +102,24 @@ def fromMoveToTensor(move:str, switch=False):
         movetensor[4] = chess.Piece.from_symbol(move[4]).piece_type/6
     movetensor.requires_grad_()
     return movetensor
+
+def findClosestLegalMove(board: chess.Board, target_square: chess.Square, from_square=None)->chess.Move|None:
+    """
+    Finds closest legal move on board with given either target square, from square or both
+    """
+    legal_moves = list(board.legal_moves)
+    if not legal_moves:
+        return None
+    if target_square:
+        if from_square:
+            return min(
+                legal_moves,
+                key=lambda move: (chess.square_distance(move.from_square, from_square)+chess.square_distance(move.to_square, target_square))
+            )
+        else:
+            return min(
+                legal_moves,
+                key=lambda move: chess.square_distance(move.to_square, target_square)
+            )
+    else:
+        return None
