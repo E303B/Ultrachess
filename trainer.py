@@ -9,7 +9,7 @@ from pathlib import Path
 from submodules import tools
 from torch import nn
 from math import floor
-
+import time
 class ChessDataset(Dataset):
     def __init__(self, chesspositions=[], chessmoves=[]):
         self.chesspositions = chesspositions
@@ -118,21 +118,43 @@ def test_loop(dataloader, model, loss_fn, device):
     test_loss /= num_batches
     print(f"Test Error: \n Accuracy: {((1-test_loss)*100):>4f}%, Avg loss: {test_loss:>8f} \nChange from previous loss: {((test_loss-previous_loss)/previous_loss*100):>4f}%\n")
     previous_loss = test_loss
+    
+start_time = time.perf_counter()
+total_time = 0
+training_data = ChessDataset.fromPath(values.learning_data_path)
+testing_data = ChessDataset.fromPath(values.testing_data_path)
+training_dataloader = DataLoader(training_data, batch_size=values.batch_size, shuffle=True)
+testing_dataloader = DataLoader(testing_data, batch_size=values.batch_size, shuffle=True)
+loss_fn = nn.L1Loss()
+model = NeuralNetwork()
+model.to(device=values.device)
+optimizer = torch.optim.SGD(model.parameters(), lr=values.learning_rate)
+
+def process(t: int):
+    global start_time
+    global total_time
+    global training_data
+    global testing_data
+    global training_dataloader
+    global testing_dataloader
+    global loss_fn
+    global model
+    global optimizer
+    
+    print(f"Epoch: {t+1}")
+    train_loop(training_dataloader, model, loss_fn, optimizer, values.device)
+    test_loop(testing_dataloader, model, loss_fn, values.device)
+    usedTime = time.perf_counter()-start_time-total_time
+    total_time += usedTime
+    avgtime = total_time/(t+1)
+    print(f"{usedTime:>2f} seconds passed, {avgtime:>2f} seconds expected. {(avgtime*(values.epochs-t)):>2f} seconds left")
+    return t
 
 if __name__ == '__main__':
-    
-    training_data = ChessDataset.fromPath(values.learning_data_path)
-    testing_data = ChessDataset.fromPath(values.testing_data_path)
-    training_dataloader = DataLoader(training_data, batch_size=values.batch_size, shuffle=True)
-    testing_dataloader = DataLoader(testing_data, batch_size=values.batch_size, shuffle=True)
-    model = NeuralNetwork()
-    model.to(device=values.device)
-    loss_fn = nn.L1Loss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=values.learning_rate)
-    
+    shutdownOnEnd = (input("Shutdown PC on end? Y/N").lower()=="y")
     for t in range(values.epochs):
-        print(f"Epoch: {t+1}")
-        train_loop(training_dataloader, model, loss_fn, optimizer, values.device)
-        test_loop(testing_dataloader, model, loss_fn, values.device)
+        process(t)
     print("Finished!")
-    torch.save(model, values.modelpath())
+    torch.save(model.state_dict(), values.modelpath())
+    if shutdownOnEnd:
+        os.system("shutdown /s")

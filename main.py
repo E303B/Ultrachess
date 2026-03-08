@@ -11,7 +11,8 @@ from trainer import ChessDataset
 import chess
 from math import floor
 
-model = torch.load(values.modelpath(), weights_only=False)
+model = NeuralNetwork()
+model.load_state_dict(torch.load(values.modelpath()))
 model.eval()
 
 def calculateBestMove(fen:str)->str|None:
@@ -40,27 +41,16 @@ def calculateBestMove(fen:str)->str|None:
                 move+=chess.piece_symbol(int(pred[0][4].item()))
             fromSquare = chess.parse_square(move[0:2])
             toSquare = chess.parse_square(move[2:4])
-            fromPiece =  board.piece_at(fromSquare)
-            if fromPiece and fromPiece.color:
-                moveObj = chess.Move.from_uci(move if fromPiece.piece_type==chess.PAWN else move[0:4])
-                if board.is_legal(moveObj):
-                    result = move
-                else:
-                    closestMove=findClosestLegalMove(board, fromSquare, toSquare)
-                    if closestMove:
-                        result= closestMove.uci()
-                    else:
-                        return None
+            closestMove=findClosestLegalMove(board, fromSquare, toSquare)
+            if closestMove:
+                result = closestMove.uci()
             else:
-                closestMove=findClosestLegalMove(board, fromSquare, toSquare)
-                if closestMove:
-                    result = closestMove.uci()
-                else:
-                    return None
-    if board.turn == chess.BLACK:
-        return reverseMove(result)
-    else:
-        return result
+                return None
+    # if board.turn == chess.BLACK:
+    #     return reverseMove(result)
+    # else:
+    #     return result
+    return result
     
 
 if __name__ == "__main__":

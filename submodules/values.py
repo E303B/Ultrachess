@@ -5,12 +5,12 @@ testing_data_path="data/test.data"
 
 # Learning related values
 device = "cpu"
-learning_rate = 1e-3
+learning_rate = 1e-5
 batch_size = 2048
-epochs = 100
+epochs = 2000
 
 # Model loading values
 modelsdirectory="models/"
-modelname="loji-0.1"
+modelname="loji-0.3"
 
 modelpath = lambda: modelsdirectory+modelname+".pth"

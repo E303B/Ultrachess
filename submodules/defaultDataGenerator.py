@@ -46,6 +46,7 @@ def playParty(startMove=""):
 if __name__ == '__main__':
     defaultOutput = "data/default.data"
     legalMoves = []
+    legalMoves.append("")
     legalMoves.append("b1a3")
     legalMoves.append("b1c3")
     legalMoves.append("g1f3")
