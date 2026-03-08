@@ -1,5 +1,5 @@
 # Important path values
-stockfishpath="C:/Coding/Stockfish/stockfish-windows-x86-64-avx2.exe"
+stockfishpath="C:/Coding/Stockfish/stockfish-windows-x86-64-avx2.exe" # Insert here path to your local stockfish
 learning_data_path="data/default.data"
 testing_data_path="data/test.data"
 
